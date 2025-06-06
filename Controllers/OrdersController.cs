@@ -25,7 +25,7 @@ namespace ToyStoreApi.Controllers
             return Ok(orders);
         }
 
-        // GET: api/Orders/5
+        // GET: api/Orders/{id}
         [HttpGet("{id}")]
         public async Task<ActionResult<OrderDto>> GetById(int id)
         {
