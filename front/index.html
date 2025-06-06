@@ -1,0 +1,138 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Магазин игрушек</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+
+        input {
+            display: block;
+            margin: 10px 0;
+            padding: 5px;
+            width: 200px;
+        }
+
+        button {
+            padding: 6px 12px;
+            margin-top: 10px;
+            cursor: pointer;
+        }
+
+        #toys-list {
+            margin-top: 20px;
+        }
+
+        .error {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <div id="login-screen">
+        <h2>Вход</h2>
+        <input type="text" id="username" placeholder="Логин" />
+        <input type="password" id="password" placeholder="Пароль" />
+        <button onclick="login()">Войти</button>
+        <p id="login-error" class="error"></p>
+    </div>
+
+    <div id="main-screen" style="display:none;">
+        <h2 id="welcome-message"></h2>
+        <button onclick="loadToys()">Показать игрушки</button>
+        <div id="toys-list"></div>
+        <div id="admin-panel" style="display:none;">
+            <h3>Добавить игрушку</h3>
+            <input type="text" id="toy-name" placeholder="Название" />
+            <input type="number" id="toy-price" placeholder="Цена" />
+            <button onclick="addToy()">Добавить</button>
+        </div>
+        <button onclick="logout()">Выйти</button>
+    </div>
+
+    <script>
+        const apiBase = "https://localhost:7121/api"; // Измени при необходимости
+
+    function login() {
+      const user = document.getElementById("username").value;
+      const pass = document.getElementById("password").value;
+
+      if (
+        (user === "user" && pass === "user") ||
+        (user === "admin" && pass === "admin")
+      ) {
+        sessionStorage.setItem("role", user === "admin" ? "admin" : "user");
+        showMainScreen(user);
+      } else {
+        document.getElementById("login-error").textContent = "Неверный логин или пароль";
+      }
+    }
+
+    function showMainScreen(username) {
+      document.getElementById("login-screen").style.display = "none";
+      document.getElementById("main-screen").style.display = "block";
+      document.getElementById("welcome-message").textContent = `Добро пожаловать, ${username}!`;
+
+      if (sessionStorage.getItem("role") === "admin") {
+        document.getElementById("admin-panel").style.display = "block";
+      }
+    }
+
+    function logout() {
+      sessionStorage.clear();
+      location.reload();
+    }
+
+    async function loadToys() {
+      const res = await fetch(`${apiBase}/Toys`);
+      const toys = await res.json();
+      const container = document.getElementById("toys-list");
+      container.innerHTML = "";
+
+      toys.forEach((toy) => {
+        const div = document.createElement("div");
+        div.textContent = `${toy.name} - ${toy.price}₽`;
+        container.appendChild(div);
+      });
+    }
+
+        async function addToy() {
+            const name = document.getElementById("toy-name").value;
+            const price = parseFloat(document.getElementById("toy-price").value);
+            const description = prompt("Введите описание игрушки:");
+            const stock = parseInt(prompt("Введите количество на складе:"), 10);
+
+            if (!name || isNaN(price) || !description || isNaN(stock)) {
+                alert("Заполните все поля корректно");
+                return;
+            }
+
+            const response = await fetch(`${apiBase}/Toys`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    name,
+                    price,
+                    description,
+                    stock
+                }),
+            });
+
+            if (response.ok) {
+                alert("Игрушка добавлена");
+                document.getElementById("toy-name").value = "";
+                document.getElementById("toy-price").value = "";
+                loadToys();
+            } else {
+                const errorText = await response.text();
+                alert("Ошибка при добавлении:\n" + errorText);
+            }
+        }
+
+    </script>
+</body>
+</html>
