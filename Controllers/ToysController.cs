@@ -43,7 +43,7 @@ namespace ToyStoreApi.Controllers
             return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
         }
 
-        // PUT: api/Toys/5
+        // PUT: api/Toys/{id}
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] ToyDto toyDto)
         {
@@ -57,7 +57,7 @@ namespace ToyStoreApi.Controllers
             return NoContent();
         }
 
-        // DELETE: api/Toys/5
+        // DELETE: api/Toys/{id}
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {

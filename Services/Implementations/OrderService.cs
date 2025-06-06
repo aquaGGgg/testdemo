@@ -42,15 +42,12 @@ namespace ToyStoreApi.Services.Implementations
 
         public async Task<OrderDto> CreateAsync(OrderDto orderDto)
         {
-            // Проверка существования клиента
             if (!await _customerRepository.ExistsAsync(orderDto.CustomerId))
                 throw new ArgumentException("Клиент не найден.");
 
-            // Проверяем, что есть хотя бы одна позиция
             if (orderDto.Items == null || !orderDto.Items.Any())
                 throw new ArgumentException("Заказ должен содержать хотя бы одну позицию.");
 
-            // Собираем сущность заказа
             var newOrder = new Order
             {
                 CustomerId = orderDto.CustomerId,
@@ -60,7 +57,6 @@ namespace ToyStoreApi.Services.Implementations
                 Items = new List<OrderItem>()
             };
 
-            // Проходим по каждой позиции
             decimal total = 0;
             foreach (var itemDto in orderDto.Items)
             {
@@ -102,8 +98,6 @@ namespace ToyStoreApi.Services.Implementations
 
             var existingOrder = await _orderRepository.GetByIdAsync(id);
 
-            // В этой простой реализации мы не позволяем менять привязку к клиенту
-            // и дату. Только позиции. Поэтому сначала “откатываем” прежний заказ:
             foreach (var oldItem in existingOrder.Items)
             {
                 var toyInStock = await _toyRepository.GetByIdAsync(oldItem.ToyId);
@@ -111,10 +105,8 @@ namespace ToyStoreApi.Services.Implementations
                 await _toyRepository.UpdateAsync(toyInStock);
             }
 
-            // Удаляем старые позиции
             existingOrder.Items.Clear();
 
-            // Собираем новые позиции
             decimal newTotal = 0;
             foreach (var itemDto in orderDto.Items)
             {
@@ -157,7 +149,6 @@ namespace ToyStoreApi.Services.Implementations
 
             var order = await _orderRepository.GetByIdAsync(id);
 
-            // При удалении заказа возвращаем товар на склад
             foreach (var item in order.Items)
             {
                 var toy = await _toyRepository.GetByIdAsync(item.ToyId);
@@ -169,7 +160,6 @@ namespace ToyStoreApi.Services.Implementations
             return true;
         }
 
-        // Вспомогательный метод для преобразования Entity → DTO
         private OrderDto MapToDto(Order order)
         {
             return new OrderDto

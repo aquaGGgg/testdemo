@@ -49,7 +49,6 @@ namespace ToyStoreApi.Services.Implementations
 
         public async Task<ToyDto> CreateAsync(ToyDto toyDto)
         {
-            // Валидация
             if (string.IsNullOrWhiteSpace(toyDto.Name))
                 throw new ArgumentException("Название игрушки обязательно.");
 

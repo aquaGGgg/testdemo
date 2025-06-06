@@ -84,7 +84,6 @@ namespace ToyStoreApi.Services.Implementations
             existing.LastName = customerDto.LastName;
             existing.Email = customerDto.Email;
             existing.Phone = customerDto.Phone;
-            // RegisteredAt оставляем без изменений
 
             await _customerRepository.UpdateAsync(existing);
             return true;
